@@ -93,3 +93,20 @@
      (when (.exists file)
        (extract-deps (u.dep/relative-path file)
                      (slurp file))))))
+
+(defn lein-loaded-deps
+  [{:keys [dependencies managed-dependencies plugins repositories]}]
+  (let [repos (normalize-repositories repositories)]
+    (->> dependencies
+         (into managed-dependencies)
+         (into plugins)
+         (distinct)
+         (keep (fn [[dep-name version]]
+                 (when (acceptable-version? version)
+                   (r/map->Dependency {:project :leiningen
+                                       :alt-loader :leiningen
+                                       :type :java
+                                       :file "project.clj"
+                                       :name (normalize-name dep-name)
+                                       :version version
+                                       :repositories repos})))))))

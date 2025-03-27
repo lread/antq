@@ -1,8 +1,10 @@
 (ns antq.upgrade.leiningen
   (:require
    [antq.constant :as const]
+   [antq.log :as log]
    [antq.upgrade :as upgrade]
    [antq.util.dep :as u.dep]
+   [antq.util.file :as u.file]
    [antq.util.zip :as u.zip]
    [rewrite-clj.zip :as z]))
 
@@ -41,6 +43,12 @@
 
 (defmethod upgrade/upgrader :leiningen
   [version-checked-dep]
-  (-> (z/of-file (:file version-checked-dep))
-      (upgrade-dep version-checked-dep)
-      (z/root-string)))
+  (if (= :leiningen (:alt-loader version-checked-dep))
+    (log/error (format "SKIPPED upgrade of %s '%s' to '%s' in %s - antq does not support upgrading leiningen loaded dependencies."
+                       (:name version-checked-dep)
+                       (:version version-checked-dep)
+                       (:latest-version version-checked-dep)
+                       (u.file/normalize-path (:file version-checked-dep))))
+    (-> (z/of-file (:file version-checked-dep))
+        (upgrade-dep version-checked-dep)
+        (z/root-string))))

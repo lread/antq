@@ -21,6 +21,7 @@
                :latest-version "2"
                :type :test
                :project nil
+               :alt-loader nil
                :latest-name nil
                :only-newest-version? nil
                :repositories nil
@@ -34,6 +35,7 @@
                :latest-version "3"
                :type :test
                :project nil
+               :alt-loader nil
                :latest-name nil
                :only-newest-version? nil
                :repositories nil

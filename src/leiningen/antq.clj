@@ -1,48 +1,41 @@
 (ns leiningen.antq
   (:require
    [antq.core]
-   [antq.dep.leiningen :as dep.lein]
-   [antq.log :as log]
-   [antq.record :as r]
-   [antq.report :as report]
-   [leiningen.core.main]))
+   [leiningen.core.main :as lein-main]
+   [clojure.string :as str]
+   [clojure.tools.cli :as cli]))
+
+;; TODO: Validation of antq opts in project.clj
+;; TODO: Compare with antq.tool
+;; TODO: What about --download and --ignore-locals for lein discovered?
 
 (defn antq
+  ;; docstring is also delivered as help for plugin (lein antq --help)
   "Leiningen plugin.
 
-  Checks project.clj via full Leiningen evaluation. Does not check any other sources (deps.edn, etc).
+  When checking `./project.clj`, also includes deps that only leiningen sees/evaluates.
+  Only deps discovered through static analysis are upgradeable.
 
-  For the time being it merely checks for outdated dependencies;
-  it doesn't support the `:upgrade` option because it cannot always know what to fix
-  (in face of eval, profiles, plugins/middleware)."
-  [{:keys [dependencies managed-dependencies plugins repositories]
-    {:keys [error-format reporter upgrade] :as antq-options} :antq}]
-  (let [repos (dep.lein/normalize-repositories repositories)
-        options (cond-> antq-options
-                  (and (not error-format)
-                       (not reporter)) (assoc :reporter "table"))
-        _ (when upgrade
-            (assert false ":upgrade option not supported under the Lein plugin."))
-        alog (log/start-async-logger!)]
-    (try
-      (let [outdated (->> dependencies
-                          (into managed-dependencies)
-                          (into plugins)
-                          (distinct)
-                          (keep (fn [[dep-name version]]
-                                  (when (dep.lein/acceptable-version? version)
-                                    (r/map->Dependency {:project :leiningen
-                                                        :type :java
-                                                        :file "project.clj"
-                                                        :name (dep.lein/normalize-name dep-name)
-                                                        :version version
-                                                        :repositories repos}))))
-                          (antq.core/antq options))]
+  Specify options on the command line as per normal cli syntax, e.g.:
+  ```
+  lein antq --upgrade
+  ```
+  You can also specify options in your `project.clj` under `:antq`, e.g.:
+  ```
+  :antq {:upgrade true}
+  ```
+  Command line options override project.clj specified options."
+  [lein-project & args]
+  (let [default-options (cli/get-default-options antq.core/cli-options)
+        {cli-options :options cli-errors :errors} (cli/parse-opts args antq.core/cli-options :no-defaults true)
+        options (-> default-options
+                    (merge (:antq lein-project))
+                    (merge cli-options)
+                    (update :error-format #(some-> %
+                                                   (str/replace #"\\n" "\n")
+                                                   (str/replace #"\\t" "\t")))
+                    (assoc :lein-context (select-keys lein-project [:dependencies :managed-dependencies :plugins :repositories])))]
+    (binding [lein-main/*exit-process?* true]
+      (with-redefs [antq.core/system-exit #(lein-main/exit %)]
+        (antq.core/main* options cli-errors)))))
 
-        (report/reporter outdated options)
-        (binding [leiningen.core.main/*exit-process?* true]
-          (leiningen.core.main/exit (if (seq outdated)
-                                      1
-                                      0))))
-      (finally
-        (log/stop-async-logger! alog)))))

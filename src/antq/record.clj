@@ -9,6 +9,9 @@
 (def ?project
   [:enum :boot :clojure :clojure-tool :github-action :gradle :leiningen :pom :shadow-cljs :circle-ci])
 
+(def ?alt-loader
+  [:enum :leiningen])
+
 (def ?dependency
   [:map
    ;; Required
@@ -18,6 +21,7 @@
    [:version 'string?]
    [:project ?project]
    ;; Filled by version checking
+   [:alt-loader [:maybe ?alt-loader]]
    [:latest-version [:maybe 'string?]]
    [:repositories [:maybe [:map-of 'string? ?repository]]]
    [:changes-url [:maybe 'string?]]
@@ -48,6 +52,10 @@
    ;; Project type keyword
    ;; e.g. :clojure, :leiningen, :shadow-cljs and so on.
    project
+   ;; Custom loader of the the dependency
+   ;; - nil for antq
+   ;; - :leiningen when loaded by leiningen plugin
+   alt-loader
    ;; Changes URL for Version Control System (Nullable)
    changes-url
    ;; Latest dependency name (Nullable)

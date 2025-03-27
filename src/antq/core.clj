@@ -276,19 +276,25 @@
 
 (defn fetch-deps
   [options]
-  (let [skip (set (:skip options))]
-    (mapcat #(concat
-              (when-not (skip "boot") (dep.boot/load-deps %))
-              (when-not (skip "circle-ci") (dep.circle-ci/load-deps %))
-              (when-not (skip "clojure-cli") (dep.clj/load-deps %))
-              (when-not (skip "github-action") (dep.gh-action/load-deps %))
-              (when-not (skip "pom") (dep.pom/load-deps %))
-              (when-not (skip "shadow-cljs") (dep.shadow/load-deps %))
-              (when-not (skip "leiningen") (dep.lein/load-deps %))
-              (when-not (skip "babashka") (dep.bb/load-deps %))
-              (when-not (skip "gradle") (dep.gradle/load-deps %))
-              (when (:check-clojure-tools options) (dep.clj.tool/load-deps)))
-            (distinct (:directory options)))))
+  (let [skip (set (:skip options))
+        deps (mapcat #(concat
+                       (when-not (skip "boot") (dep.boot/load-deps %))
+                       (when-not (skip "circle-ci") (dep.circle-ci/load-deps %))
+                       (when-not (skip "clojure-cli") (dep.clj/load-deps %))
+                       (when-not (skip "github-action") (dep.gh-action/load-deps %))
+                       (when-not (skip "pom") (dep.pom/load-deps %))
+                       (when-not (skip "shadow-cljs") (dep.shadow/load-deps %))
+                       (when-not (skip "leiningen") (dep.lein/load-deps %))
+                       (when-not (skip "babashka") (dep.bb/load-deps %))
+                       (when-not (skip "gradle") (dep.gradle/load-deps %))
+                       (when (:check-clojure-tools options) (dep.clj.tool/load-deps)))
+                     (distinct (:directory options)))]
+    (if (and (not (skip "leiningen")) (:lein-context options))
+      (let [lein-loaded-deps (dep.lein/lein-loaded-deps (:lein-context options))
+            deps-ndx (set (mapv #(select-keys % [:file :name :version]) deps))
+            lein-loaded-additions (remove #(deps-ndx (select-keys % [:file :name :version])) lein-loaded-deps)]
+        (concat deps lein-loaded-additions))
+      deps)))
 
 (defn mark-only-newest-version-flag
   [deps]
