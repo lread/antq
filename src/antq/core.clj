@@ -52,6 +52,9 @@
    [antq.ver.java]
    [clojure.string :as str]
    [clojure.tools.cli :as cli]
+   [malli.core :as m]
+   [malli.error :as me]
+   [malli.transform :as mt]
    [version-clj.core :as version])
   (:import
    clojure.lang.ExceptionInfo))
@@ -104,6 +107,107 @@
    [nil "--no-changes"]
    [nil "--changes-in-table"]
    [nil "--transitive"]])
+
+(def options-spec
+  [:map {:closed true}
+   [:exclude
+    {:optional true :default []}
+    [:vector string?]]
+   [:focus
+    {:optional true :default []}
+    [:vector string?]]
+   [:skip
+    {:optional true :default []}
+    [:vector (apply conj [:enum] (-> skippable sort vec))]]
+   [:error
+    {:optional true}
+    string?]
+   [:reporter
+    {:optional true :default "table"}
+    (apply conj [:enum] (-> supported-reporter sort vec))]
+   [:directory
+    {:optional true :default []}
+    [:vector string?]]
+   [:upgrade
+    {:optional true :default false}
+    boolean?]
+   [:verbose
+    {:optional true :default false}
+    boolean?]
+   [:force
+    {:optional true :default false}
+    boolean?]
+   [:ignore-locals
+    {:optional true :default false}
+    boolean?]
+   [:check-clojure-tools
+    {:optional true :default false}
+    boolean?]
+   [:no-diff
+    {:optional true :default false}
+    boolean?] ;; deprecated (for backward compatiblity)
+   [:no-changes
+    {:optional true :default false}
+    boolean?]
+   [:changes-in-table
+    {:optional true :default false}
+    boolean?]
+   [:transitive {:optional true :default false}
+    boolean?]])
+
+options-spec
+;; => [:map
+;;     {:closed true}
+;;     [:exclude
+;;      {:optional true, :default []}
+;;      [:vector #function[clojure.core/string?--5475]]]
+;;     [:focus
+;;      {:optional true, :default []}
+;;      [:vector #function[clojure.core/string?--5475]]]
+;;     [:skip
+;;      {:optional true, :default []}
+;;      [:vector
+;;       [:enum
+;;        "babashka"
+;;        "boot"
+;;        "circle-ci"
+;;        "clojure-cli"
+;;        "github-action"
+;;        "gradle"
+;;        "leiningen"
+;;        "pom"
+;;        "shadow-cljs"]]]
+;;     [:error {:optional true} :string?]
+;;     [:reporter
+;;      {:optional true, :default "table"}
+;;      [:enum "__NO_OUTPUT__" "edn" "format" "json" "table"]]]
+
+(defn validate-options
+  "Validate options (for options specified via lein plugin or clojure tools, for example)"
+  [options]
+  (if (m/validate options-spec options)
+    {:options (m/decode options-spec options
+                        (mt/default-value-transformer {::mt/add-optional-keys true}))}
+    {:errors (-> options-spec (m/explain options) me/humanize)}))
+
+(comment
+  (validate-options {:skip ["leiningen"]})
+
+
+  (m/decode [:map
+             [:reporter
+              {:optional true, :default "table"}
+              [:enum "__NO_OUTPUT__" "edn" "format" "json" "table"]]
+            #_ [:reporter
+              {:optional true :default "fa"}
+              [:enum "__NO_OUTPUT__" "fa"]]]
+            {}
+            (mt/default-value-transformer {::mt/add-optional-keys true}))
+
+  (m/validate options-spec {})
+  
+  :eoc)
+
 
 (defn- parse-artifact
   "Retrieve artifact name and version from artifact string"
