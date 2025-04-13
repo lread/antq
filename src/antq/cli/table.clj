@@ -21,7 +21,7 @@
                   (map (fn [width cell] (pad width cell)) widths row))]
     (map pad-row rows)))
 
-(defn cell-widths
+(defn- cell-widths
   [rows]
   (reduce
    (fn [widths row]

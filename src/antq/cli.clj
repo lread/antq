@@ -36,7 +36,7 @@
                 (str/join " " (mapv #(str option "=" %) sample-values))
                 option (str/join ":" sample-values))})
 
-(def cli-options
+(def ^:private cli-options
   {:exclude
    {:ref "<artifact-name[@version]>"
     :collect multi-value
@@ -215,7 +215,23 @@
                               ((-> cli-options deprecated-opt :deprecated-fn) opts))}))
             [:no-diff])))
 
+(defn- opts->args
+  [m]
+  (->> m
+       (reduce (fn [acc [k v]]
+                 (if (vector? v)
+                   (apply conj acc (interleave (repeat k) v))
+                   (conj acc k v)))
+               [])
+       (mapv #(if-not (string? %) (pr-str %) %))))
+
 (defn usage-help
+  "Return usage help as a string
+
+  opts:
+  - `:usage-help-style`
+    - `:cli` for -M style help
+    - `:clojure-tool` for -T and -X style help "
   [{:keys [opts]}]
   (str "antq ARG USAGE:\n"
        " [options..]\n"
@@ -227,26 +243,16 @@
                              :check-clojure-tools :no-changes :changes-in-table :transitive
                              :help]})))
 
-(defn- opts->args
-  [m]
-  (->> m
-       (reduce (fn [acc [k v]]
-                 (if (vector? v)
-                   (apply conj acc (interleave (repeat k) v))
-                   (conj acc k v)))
-               [])
-       (mapv #(if-not (string? %) (pr-str %) %))))
-
 (defn parse-args
   "Parses command line `args` and returns a map of:
-  - :warnings - non-fatal issues, caller should dispaly
-  - :errors - fatal issues, caller should display
-  - :help - usage help as text, caller should display
-  - :opts - parsed opts
+  - `:warnings` - non-fatal issues, caller should dispaly
+  - `:errors` - fatal issues, caller should display
+  - `:help` - usage help as text, caller should display
+  - `:opts` - parsed opts
 
   It is assumed caller will exit process on existence of:
-  - :errors - non-zero exit
-  - :help only - zero exit"
+  - `:errors` - non-zero exit
+  - `:help` only - zero exit"
   [args]
   (let [errors (atom [])
         orig-args args
@@ -276,6 +282,7 @@
           (assoc :opts opts))))))
 
 (defn validate-tool-opts
+  "Validate -T and -X style delivered `opts`, see `parse-args` for returns."
   [opts]
   (->> opts
        opts->args
