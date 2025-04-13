@@ -56,10 +56,6 @@
   (:import
    clojure.lang.ExceptionInfo))
 
-(defn- concat-assoc-fn
-  [opt k v]
-  (update opt k concat (str/split v #":")))
-
 (def ^:private disallowed-unverified-deps-map
   {"antq/antq" "com.github.liquidz/antq"
    "seancorfield/depstar" "com.github.seancorfield/depstar"
