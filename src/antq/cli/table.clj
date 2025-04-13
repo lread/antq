@@ -1,5 +1,5 @@
 (ns ^:no-doc antq.cli.table
-   "Most of this table support is stolen/adapted from babashka.cli"
+   "Table support modified from babashka.cli but with multiline cell support"
   (:require
    [clojure.string :as str]))
 
@@ -19,50 +19,45 @@
                   (map (fn [width cell] (pad width cell)) widths row))]
     (map pad-row rows)))
 
-(defn- expand-multilines
-  "Expand last column cell over multiple rows if it contains newlines"
-  [rows]
-  (reduce (fn [acc row]
-            (let [[line & extra-lines] (-> row last str/split-lines)
-                  cols (count row)]
-              (if (seq extra-lines)
-                (apply conj acc
-                       (assoc (into [] row) (dec cols) line)
-                       (map #(conj (into [] (repeat (dec cols) ""))
-                                   %)
-                            extra-lines))
-                (conj acc row))))
-          []
-          rows))
-
 (defn cell-widths [rows]
   (reduce
    (fn [widths row]
      (map max (map str-width row) widths)) (repeat 0) rows))
 
+(defn- expand-multiline-cells [rows]
+  (let [col-cnt (count (first rows))]
+    (->> (for [row rows]
+           (let [row-lines (mapv str/split-lines row)
+                 max-lines-cell (reduce max (mapv count row-lines))]
+             (for [line-ndx (range max-lines-cell)]
+               (for [col-ndx (range col-cnt)]
+                 (get-in row-lines [col-ndx line-ndx] "")))))
+         (mapcat identity))))
+
 (defn format-table
-  "Modified from bb cli format-table. Allow pre-computed widths to be passed in."
-  [{:keys [rows indent widths] :or {indent 2}}]
-  (let [widths (or widths (cell-widths rows))
-        rows (expand-multilines rows)
-        rows (pad-cells rows widths)
-        fmt-row (fn [leader divider trailer row]
-                  (str leader
-                       (apply str (interpose divider row))
-                       trailer))]
+  [{:keys [rows]}]
+  (let [rows (expand-multiline-cells rows)
+        widths (cell-widths rows)
+        rows (pad-cells rows widths)]
     (->> rows
          (map (fn [row]
-                (fmt-row (apply str (repeat indent " ")) " " "" row)))
+                (str " "
+                     (apply str (interpose "  " row)))))
          (map str/trimr)
          (str/join "\n"))))
 
 (comment
-  (-> (format-table {:rows [["r1c1" "r1c2" "r1c3"]
-                            ["r2c1 wider" "r2c2" "r2c3"]
-                            ["r3c1" "r3c2 wider" "r3c3"]]})
+  (-> (format-table {:rows [["r1c1\nr1c1 l2" "r1c2" "r1c3"]
+                             ["r2c1 wider" "r2c2\nr2c2 l2\nr2c2 l3" "r2c3\nr2c3 l2"]
+                             ["r3c1" "r3c2 wider" "r3c3\nr3c3 l2\nr3c3 l3"]]})
       str/split-lines)
-  ;; => ["  r1c1       r1c2       r1c3"
-  ;;     "  r2c1 wider r2c2       r2c3"
-  ;;     "  r3c1       r3c2 wider r3c3"]
+  ;; => [" r1c1        r1c2        r1c3"
+  ;;     " r1c1 l2"
+  ;;     " r2c1 wider  r2c2        r2c3"
+  ;;     "             r2c2 l2     r2c3 l2"
+  ;;     "             r2c2 l3"
+  ;;     " r3c1        r3c2 wider  r3c3"
+  ;;     "                         r3c3 l2"
+  ;;     "                         r3c3 l3"]
 
   :eoc)

@@ -23,11 +23,11 @@
 
 (declare styled-long-opt)
 
-(defn multi-value [coll arg-value]
+(defn- multi-value [coll arg-value]
   (into (or coll [])
         (str/split (str arg-value) #":")))
 
-(defn multi-value-tip [option sample-values]
+(defn- multi-value-tip [option sample-values]
   {:clojure-tool (format "for multiple, use a vector, ex: '[%s]'\n or use colon separators: %s"
                          (str/join " " sample-values) (str/join ":" sample-values))
    :cli (format "for multiple, repeat arg, ex: %s\n or use colon separators: %s=%s"
@@ -132,37 +132,61 @@
   [kw]
   (subs (str kw) 1))
 
-(defn styled-long-opt [longopt {:keys [usage-help-style]}]
+(defn- styled-long-opt [longopt {:keys [usage-help-style]}]
   (if (= :clojure-tool usage-help-style)
     longopt
     (str "--" (kw->str longopt))))
 
-(defn styled-alias [alias {:keys [usage-help-style]}]
+(defn- styled-alias [alias {:keys [usage-help-style]}]
   (if (= :clojure-tool usage-help-style)
     alias
     (str "-" (kw->str alias))))
+
+(defn- wrap-words [words wrap-at]
+  (reduce (fn [acc enum]
+            (let [row-ndx (dec (count acc))
+                  enums-len (reduce + (map count (last acc)))]
+              (if (> enums-len wrap-at)
+                (conj acc [enum])
+                (update acc row-ndx conj enum))))
+          [[]]
+          words))
+
+(defn- wrapped-option-ref [option ref wrap-at]
+  (let [rows (wrap-words (str/split ref #"\|") wrap-at)]
+    (str option (->> rows
+                     (mapv #(str/join "|" %))
+                     (str/join (str "\n" (apply str (repeat (inc (count option)) " ")) "|"))))))
+
+(defn- fmt-option-ref [long-opt ref {:keys [usage-help-style] :as opts}]
+  (let [option (styled-long-opt long-opt opts)
+        option (if (and ref (= :cli usage-help-style))
+                 (str option "=")
+                 (str option " "))
+        wrap-at 20]
+    (if (and ref (str/includes? ref "|") (> (+ (count ref) (count option)) wrap-at))
+      (wrapped-option-ref option ref wrap-at)
+      (str option ref))))
 
 (defn- opts->table
   "Based on bb cli opts->table but uses less screen width."
   [{:keys [spec order opts]}]
   (let [usage-help-style (:usage-help-style opts)]
     (mapv (fn [[long-opt {:keys [alias default default-desc ref desc extra-desc]}]]
-            (keep identity
-                  [(if alias
-                     (str (styled-alias alias opts) ",")
-                     "")
-                   (str (styled-long-opt long-opt opts)
-                        (when ref
-                          (str (if (= :cli usage-help-style) "=" " ")
-                               ref)))
-                   (->> [(if-let [default (or default-desc
-                                                (when (some? default) (str default)))]
-                           (format "%s\n default: %s" desc default)
-                           desc)
-                         (when-let [extra-desc (get extra-desc usage-help-style)]
-                           (str " " extra-desc))]
-                        (keep identity)
-                        (str/join "\n"))]))
+            (let [alias (if alias
+                          (str (styled-alias alias opts) ",")
+                          "")
+                  option (fmt-option-ref long-opt ref opts)
+                  desc (->> [(if-let [default (or default-desc
+                                                  (when (some? default) (str default)))]
+                               (format "%s\n default: %s" desc default)
+                               desc)
+                             (when-let [extra-desc (get extra-desc usage-help-style)]
+                               (str " " extra-desc))]
+                            (keep identity)
+                            (str/join "\n"))]
+
+              [alias option desc]))
           (if (map? spec)
             (let [order (or order (keys spec))]
               (map (fn [k] [k (spec k)]) order))
