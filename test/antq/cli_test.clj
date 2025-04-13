@@ -130,8 +130,10 @@
                                :msg #"no-diff.*deprecated.*use.*no-changes"}]
                    :errors [{:cause :restrict :msg #"Unknown option.*excude"}
                             {:cause :validate :msg #"Invalid value.*reporter.*foo"}
-                            {:cause :validate :msg #"Invalid value.*skip.*nope"}]}
-                  (sut/parse-args ["--reporter" "foo"
+                            {:cause :validate :msg #"Invalid value.*skip.*nope"}
+                            {:cause :invalid-command :msg #"Antq supports no cli commands.*somecmd"}]}
+                  (sut/parse-args ["somecmd"
+                                   "--reporter" "foo"
                                    "--skip" "nope"
                                    "--no-diff"
                                    "--excude" "spello"]))))
