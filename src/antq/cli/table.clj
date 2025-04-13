@@ -1,5 +1,5 @@
 (ns ^:no-doc antq.cli.table
-   "Table support modified from babashka.cli but with multiline cell support"
+  "Table support modified from babashka.cli but with multiline cell support"
   (:require
    [clojure.string :as str]))
 
@@ -10,7 +10,9 @@
                                          (re-pattern "(\\x9B|\\x1B\\[)[0-?]*[ -\\/]*[@-~]") "")]
     (count (strip-escape-codes s))))
 
-(defn- pad [len s] (str s (apply str (repeat (- len (str-width s)) " "))))
+(defn- pad
+  [len s]
+  (str s (apply str (repeat (- len (str-width s)) " "))))
 
 (defn- pad-cells
   "Adapted from bb cli"
@@ -19,12 +21,14 @@
                   (map (fn [width cell] (pad width cell)) widths row))]
     (map pad-row rows)))
 
-(defn cell-widths [rows]
+(defn cell-widths
+  [rows]
   (reduce
    (fn [widths row]
      (map max (map str-width row) widths)) (repeat 0) rows))
 
-(defn- expand-multiline-cells [rows]
+(defn- expand-multiline-cells
+  [rows]
   (let [col-cnt (count (first rows))]
     (->> (for [row rows]
            (let [row-lines (mapv str/split-lines row)

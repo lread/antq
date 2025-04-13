@@ -23,11 +23,13 @@
 
 (declare styled-long-opt)
 
-(defn- multi-value [coll arg-value]
+(defn- multi-value
+  [coll arg-value]
   (into (or coll [])
         (str/split (str arg-value) #":")))
 
-(defn- multi-value-tip [option sample-values]
+(defn- multi-value-tip
+  [option sample-values]
   {:clojure-tool (format "for multiple, use a vector, ex: '[%s]'\n or use colon separators: %s"
                          (str/join " " sample-values) (str/join ":" sample-values))
    :cli (format "for multiple, repeat arg, ex: %s\n or use colon separators: %s=%s"
@@ -69,14 +71,15 @@
    :directory
    {:alias :d
     :ref "<directory>"
-    :collect (fn multi-value [coll arg-value]
+    :collect (fn multi-value
+               [coll arg-value]
                ;; "." is not optional/overideable
                (into (or coll ["."])
                      (str/split arg-value #":")))
     :default ["."]
     :default-desc "./"
     :desc "Add search paths for projects (in addition to ./)"
-    :extra-desc (multi-value-tip "--directory" ["./dira" "./dirb"] )}
+    :extra-desc (multi-value-tip "--directory" ["./dira" "./dirb"])}
 
    :upgrade
    {:coerce boolean
@@ -132,17 +135,20 @@
   [kw]
   (subs (str kw) 1))
 
-(defn- styled-long-opt [longopt {:keys [usage-help-style]}]
+(defn- styled-long-opt
+  [longopt {:keys [usage-help-style]}]
   (if (= :clojure-tool usage-help-style)
     longopt
     (str "--" (kw->str longopt))))
 
-(defn- styled-alias [alias {:keys [usage-help-style]}]
+(defn- styled-alias
+  [alias {:keys [usage-help-style]}]
   (if (= :clojure-tool usage-help-style)
     alias
     (str "-" (kw->str alias))))
 
-(defn- wrap-words [words wrap-at]
+(defn- wrap-words
+  [words wrap-at]
   (reduce (fn [acc enum]
             (let [row-ndx (dec (count acc))
                   enums-len (reduce + (map count (last acc)))]
@@ -152,13 +158,15 @@
           [[]]
           words))
 
-(defn- wrapped-option-ref [option ref wrap-at]
+(defn- wrapped-option-ref
+  [option ref wrap-at]
   (let [rows (wrap-words (str/split ref #"\|") wrap-at)]
     (str option (->> rows
                      (mapv #(str/join "|" %))
                      (str/join (str "\n" (apply str (repeat (inc (count option)) " ")) "|"))))))
 
-(defn- fmt-option-ref [long-opt ref {:keys [usage-help-style] :as opts}]
+(defn- fmt-option-ref
+  [long-opt ref {:keys [usage-help-style] :as opts}]
   (let [option (styled-long-opt long-opt opts)
         option (if (and ref (= :cli usage-help-style))
                  (str option "=")
@@ -195,7 +203,8 @@
   [{:as cfg}]
   (cli-table/format-table {:rows (opts->table cfg) :indent 2}))
 
-(defn- deprecation-warnings [opts]
+(defn- deprecation-warnings
+  [opts]
   (into [] (keep
             (fn [deprecated-opt]
               (when (deprecated-opt opts)
@@ -204,20 +213,22 @@
                  :msg (format "%s is deprecated and will be deleted in a future release. %s"
                               (styled-long-opt deprecated-opt opts)
                               ((-> cli-options deprecated-opt :deprecated-fn) opts))}))
-              [:no-diff])))
+            [:no-diff])))
 
-(defn usage-help [{:keys [opts]}]
+(defn usage-help
+  [{:keys [opts]}]
   (str "antq ARG USAGE:\n"
        " [options..]\n"
        "\n"
        (format-opts {:spec cli-options :opts opts
-                 ;; match order from README, exclude deprecated and undocumented options
-                 :order [:upgrade :force :exclude :directory :focus
-                         :skip :error-format :reporter :download :ignore-locals
-                         :check-clojure-tools :no-changes :changes-in-table :transitive
-                         :help]})))
+                     ;; match order from README, exclude deprecated and undocumented options
+                     :order [:upgrade :force :exclude :directory :focus
+                             :skip :error-format :reporter :download :ignore-locals
+                             :check-clojure-tools :no-changes :changes-in-table :transitive
+                             :help]})))
 
-(defn- opts->args [m]
+(defn- opts->args
+  [m]
   (->> m
        (reduce (fn [acc [k v]]
                  (if (vector? v)
@@ -253,7 +264,7 @@
                                    :cause :invalid-command
                                    :msg (format "Antq supports no cli commands, but found: %s" (str/join ", " args))
                                    :spec cli-options})
-                     errors) ]
+                     errors)]
         (cond-> {}
           (seq warnings)
           (assoc :warnings warnings)
@@ -264,7 +275,8 @@
           :else
           (assoc :opts opts))))))
 
-(defn validate-tool-opts [opts]
+(defn validate-tool-opts
+  [opts]
   (->> opts
        opts->args
        (into [":usage-help-style" ":clojure-tool"])

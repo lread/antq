@@ -342,9 +342,9 @@
   "Entrypoint for clojure -M cli usage"
   [& args]
   (let [opts-res (-> (antq.cli/parse-args args)
-                (update :error-format #(some-> %
-                                               (str/replace #"\\n" "\n")
-                                               (str/replace #"\\t" "\t"))))]
+                     (update :error-format #(some-> %
+                                                    (str/replace #"\\n" "\n")
+                                                    (str/replace #"\\t" "\t"))))]
 
     (binding [log/*verbose* (:verbose (:opts opts-res) false)]
       (main* opts-res))))

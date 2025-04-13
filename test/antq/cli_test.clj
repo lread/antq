@@ -2,8 +2,8 @@
   (:require
    [antq.cli :as sut]
    [clojure.test :as t]
-   [matcher-combinators.test]
-   [matcher-combinators.matchers :as m]))
+   [matcher-combinators.matchers :as m]
+   [matcher-combinators.test]))
 
 (t/deftest cli-options-test
   (t/testing "default options"
@@ -147,8 +147,8 @@
 (t/deftest validate-tool-opts
   (t/testing "defaults"
     (t/is (= {:opts {:directory ["."]
-              :reporter "table"
-              :usage-help-style :clojure-tool}}
+                     :reporter "table"
+                     :usage-help-style :clojure-tool}}
              (sut/validate-tool-opts {}))))
 
   (t/testing "multi-value"
@@ -192,8 +192,8 @@
                           :no-changes true
                           :changes-in-table true
                           :transitive true}}
-                  (sut/validate-tool-opts {:exclude "art1:art2@1.2.3" ;; try colon separated for multi
-                                           :focus ["art3" "art4"]     ;; try vector for multi
+                  (sut/validate-tool-opts {:exclude "art1:art2@1.2.3" ; try colon separated for multi
+                                           :focus ["art3" "art4"]     ; try vector for multi
                                            :skip "pom:gradle:leiningen"
                                            :error-format "my error format"
                                            :reporter "json"
@@ -203,7 +203,7 @@
                                            :force true
                                            :download true
                                            :ignore-locals true
-                                           :check-clojure-tools "FOO" ;; test coercion to boolean
+                                           :check-clojure-tools "FOO" ; test coercion to boolean
                                            :no-changes true
                                            :changes-in-table true
                                            :transitive true}))))
@@ -224,4 +224,4 @@
     (t/is (match? {:errors m/absent
                    :warnings m/absent
                    :help #"(?s).*USAGE.*:upgrade.*use a vector"}
-             (sut/validate-tool-opts {:help true})))))
+                  (sut/validate-tool-opts {:help true})))))
