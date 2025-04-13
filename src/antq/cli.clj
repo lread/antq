@@ -187,10 +187,8 @@
                             (str/join "\n"))]
 
               [alias option desc]))
-          (if (map? spec)
-            (let [order (or order (keys spec))]
-              (map (fn [k] [k (spec k)]) order))
-            spec))))
+          (let [order (or order (keys spec))]
+            (map (fn [k] [k (spec k)]) order)))))
 
 (defn- format-opts
   "customized bb cli format-opts"
