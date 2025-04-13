@@ -89,6 +89,53 @@
                    :opts {:no-diff true}}
                   (sut/parse-args ["--no-diff"]))))
 
+  (t/testing "all opts - all valid"
+    (t/is (match? {:errors m/absent
+                   :warnings m/absent
+                   :help m/absent
+                   :opts {:exclude ["art1" "art2@1.2.3" "art7"]
+                          :focus ["art3" "art4"]
+                          :skip ["pom" "gradle" "leiningen"]
+                          :error-format "my error format"
+                          :reporter "json"
+                          :directory ["." "two" "three"]
+                          :upgrade true
+                          :verbose true
+                          :force true
+                          :download true
+                          :ignore-locals true
+                          :check-clojure-tools true
+                          :no-changes true
+                          :changes-in-table true
+                          :transitive true}}
+                  (sut/parse-args ["--exclude" "art1:art2@1.2.3" "--exclude" "art7"
+                                   "--focus" "art3" "--focus" "art4"
+                                   "--skip" "pom:gradle" "--skip" "leiningen"
+                                   "--error-format" "my error format"
+                                   "--reporter" "json"
+                                   "--directory" "two" "-d" "three"
+                                   "--upgrade"
+                                   "--verbose"
+                                   "--force"
+                                   "--download"
+                                   "--ignore-locals"
+                                   "--check-clojure-tools"
+                                   "--no-changes"
+                                   "--changes-in-table"
+                                   "--transitive"]))))
+
+  (t/testing "errors and warnings"
+    (t/is (match? {:help #"(?s).*USAGE.*--upgrade.*repeat arg"
+                   :warnings [{:cause :deprecation
+                               :msg #"no-diff.*deprecated.*use.*no-changes"}]
+                   :errors [{:cause :restrict :msg #"Unknown option.*excude"}
+                            {:cause :validate :msg #"Invalid value.*reporter.*foo"}
+                            {:cause :validate :msg #"Invalid value.*skip.*nope"}]}
+                  (sut/parse-args ["--reporter" "foo"
+                                   "--skip" "nope"
+                                   "--no-diff"
+                                   "--excude" "spello"]))))
+
   (t/testing "--help"
     (t/is (match? {:errors m/absent
                    :warnings m/absent
