@@ -318,6 +318,15 @@ Antq uses https://github.com/athos/pogonos[Pogonos] as a template engine, so you
 
 e.g. `{{name}}{{#latest-name}} -> {{.}}{{/latest-name}}`
 
+[TIP]
+====
+When running as a clojure tool, you might need some extra escaping for this option's value, .i.e.:
+[source,shell]
+----
+clojure -Tantq outdated :error-format '"{{file}}::{{message}}"'
+----
+====
+
 [[opt-reporter]]
 === --reporter=REPORTER
 
