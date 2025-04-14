@@ -1,6 +1,5 @@
 (ns ^:no-doc antq.cli
   (:require
-   [antq.cli.table :as cli-table]
    [babashka.cli :as cli]
    [clojure.string :as str]))
 
@@ -201,7 +200,7 @@
 (defn- format-opts
   "customized bb cli format-opts"
   [{:as cfg}]
-  (cli-table/format-table {:rows (opts->table cfg) :indent 2}))
+  (cli/format-table {:rows (opts->table cfg) :indent 1}))
 
 (defn- deprecation-warnings
   [opts]
