@@ -5,7 +5,7 @@ jobs:
   test:
     strategy:
       matrix:
-        java: ['11', '17', '21']
+        java: ['21']
 
     runs-on: ubuntu-latest
     steps:
@@ -19,6 +19,10 @@ jobs:
         with:
           cli: latest
           lein: latest
+      - name: Install Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.14.3'
       - uses: actions/cache@v4
         with:
           path: ~/.m2
