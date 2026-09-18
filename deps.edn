@@ -17,9 +17,7 @@
  {:ns-default antq.tool}
 
  :aliases
- {:1.10
-  {:override-deps {org.clojure/clojure ^:antq/exclude {:mvn/version "1.10.3"}}}
-  :1.11
+ {:1.11
   {:override-deps {org.clojure/clojure ^:antq/exclude {:mvn/version "1.11.4"}}}
 
   :dev
