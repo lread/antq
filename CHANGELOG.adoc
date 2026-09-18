@@ -2,6 +2,9 @@ All notable changes to this project will be documented in this file. This change
 
 == Unreleased (dev)
 
+=== Changed 
+* General dep bumping maintenance after migrating antq to clj-commons :tada:
+
 == 2.11.1276 (2025-03-15)
 // {{{
 === Changed
