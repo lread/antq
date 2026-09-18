@@ -12,6 +12,7 @@
    [clojure.tools.deps.util.maven :as deps.util.maven]
    [clojure.tools.deps.util.session :as deps.util.session])
   (:import
+   eu.maveniverse.maven.mima.context.Context
    (java.net
     Authenticator
     PasswordAuthentication)
@@ -87,7 +88,7 @@
   ^Settings
   [opts]
   (let [settings ^Settings (deps.util.maven/get-settings)
-        server-ids (set (map #(.getId %) (.getServers settings)))]
+        server-ids (set (map #(.getId ^Server %) (.getServers settings)))]
     ;; NOTE
     ;; In Leiningen, authentication information is defined in project.clj or profiles.clj instead of ~/.m2/settings.xml,
     ;; so if there is authentication information in `:repositories`, apply to `settings`
@@ -120,12 +121,13 @@
         local-repo @deps.util.maven/cached-local-repo
         system ^RepositorySystem (deps.util.session/retrieve :mvn/system #(deps.util.maven/make-system))
         settings ^Settings (get-maven-settings opts)
-        session ^DefaultRepositorySystemSession (deps.util.maven/make-session system settings local-repo)
+        context ^Context (deps.util.maven/make-context :local-repo local-repo :settings settings)
+        session ^DefaultRepositorySystemSession (deps.util.maven/make-system-session context)
         ;; Overwrite TransferListener not to show "Downloading" messages
         _ (.setTransferListener session custom-transfer-listener)
         ;; c.f. https://stackoverflow.com/questions/35488167/how-can-you-find-the-latest-version-of-a-maven-artifact-from-java-using-aether
         artifact (deps.util.maven/coord->artifact lib {:mvn/version version})
-        remote-repos (deps.util.maven/remote-repos (:repositories opts) settings)]
+        remote-repos (deps.util.maven/remote-repos system session (:repositories opts))]
     {:system system
      :session session
      :artifact artifact
