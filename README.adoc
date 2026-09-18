@@ -31,7 +31,7 @@ If you have a trouble, please see link:./doc/non-supported-clojure-version.adoc[
 |
 
 | shadow-cljs.edn
-| https://githur.com/thheller/shadow-cljs[Shadow-cljs]
+| https://github.com/thheller/shadow-cljs[Shadow-cljs]
 | {sym-yes}
 |
 | project.clj
