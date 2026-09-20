@@ -82,7 +82,11 @@
 
   (t/testing "--no-diff"
     (t/is (true? (get-in (test-parse-opts ["--no-diff"])
-                         [:options :no-diff])))))
+                         [:options :no-diff]))))
+
+  (t/testing "--no-progress"
+    (t/is (true? (get-in (test-parse-opts ["--no-progress"])
+                         [:options :no-progress])))))
 
 (t/deftest skip-artifacts?-test
   (t/testing "default"
