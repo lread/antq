@@ -137,10 +137,10 @@
     (t/is (match? {:help #"(?s).*USAGE.*--upgrade.*repeat arg"
                    :warnings [{:cause :deprecation
                                :msg #"no-diff.*deprecated.*use.*no-changes"}]
-                   :errors [{:cause :restrict :msg #"Unknown option.*excude"}
+                   :errors [{:cause :restrict-args :msg #"Unexpected argument.*somecmd"}
+                            {:cause :restrict :msg #"Unknown option.*excude"}
                             {:cause :validate :msg #"Invalid value.*reporter.*foo"}
-                            {:cause :validate :msg #"Invalid value.*skip.*nope"}
-                            {:cause :invalid-command :msg #"Antq supports no cli commands.*somecmd"}]}
+                            {:cause :validate :msg #"Invalid value.*skip.*nope"}]}
                   (sut/parse-args ["somecmd"
                                    "--reporter" "foo"
                                    "--skip" "nope"

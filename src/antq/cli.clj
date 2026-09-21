@@ -262,18 +262,13 @@
         {:keys [opts]} (cli/parse-args args {:spec (select-keys cli-options [:help :usage-help-style])})]
     (if (:help opts)
       {:help (usage-help {:opts opts})}
-      (let [{:keys [args opts]} (cli/parse-args orig-args
-                                                {:spec cli-options
-                                                 :error-fn (fn [error] (swap! errors conj error))
-                                                 :restrict true})
+      (let [{:keys [opts]} (cli/parse-args orig-args
+                                           {:spec cli-options
+                                            :error-fn (fn [error] (swap! errors conj error))
+                                            :restrict true
+                                            :restrict-args true})
             errors @errors
-            warnings (deprecation-warnings opts)
-            errors (if (seq args)
-                     (conj errors {:type :antq/cli
-                                   :cause :invalid-command
-                                   :msg (format "Antq supports no cli commands, but found: %s" (str/join ", " args))
-                                   :spec cli-options})
-                     errors)]
+            warnings (deprecation-warnings opts)]
         (cond-> {}
           (seq warnings)
           (assoc :warnings warnings)
