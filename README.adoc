@@ -1,23 +1,25 @@
 = Antq
+:project-src-coords: clj-commons/antq
+:project-mvn-coords: com.github.liquidz/antq 
+:workflow-url: https://github.com/{project-src-coords}/actions/workflows
 :sym-yes: ✅
 :sym-no: ❌
 
 Point out your outdated dependencies.
 
-image:https://github.com/liquidz/antq/workflows/test/badge.svg["GitHub Actions for test workflow", link="https://github.com/liquidz/antq/actions?query=workflow%3Atest"]
-image:https://github.com/liquidz/antq/workflows/lint/badge.svg["GitHub Actions for lint workflow", link="https://github.com/liquidz/antq/actions?query=workflow%3Alint"]
-image:https://github.com/liquidz/antq/workflows/dependencies/badge.svg["GitHub Actions for dependencies workflow", link="https://github.com/liquidz/antq/actions?query=workflow%3Adependencies"]
-image:https://codecov.io/gh/liquidz/antq/branch/master/graph/badge.svg["codecov", link="https://codecov.io/gh/liquidz/antq"]
-
-image:https://cljdoc.org/badge/com.github.liquidz/antq["cljdoc", link="https://cljdoc.org/d/com.github.liquidz/antq"]
-image:https://img.shields.io/clojars/v/com.github.liquidz/antq["Clojars Project", link="https://clojars.org/com.github.liquidz/antq"]
-image:https://img.shields.io/badge/docker-automated-blue["GitHub Container Registry", link="https://github.com/users/liquidz/packages/container/package/antq"]
+{workflow-url}/test.yml[image:{workflow-url}/test.yml/badge.svg[GitHub Actions for test workflow]]
+{workflow-url}/lint.yml[image:{workflow-url}/lint.yml/badge.svg[GitHub Actions for lint workflow]]
+{workflow-url}/dependencies.yml[image:{workflow-url}/dependencies.yml/badge.svg[GitHub Actions for dependencies workflow]]
+https://codecov.io/gh/{project-src-coords}[image:https://codecov.io/gh/{project-src-coords}/branch/main/graph/badge.svg[Code Coverage]]
+https://cljdoc.org/d/{project-mvn-coords}/CURRENT[image:https://cljdoc.org/badge/{project-mvn-coords}[cljdoc]]
+https://clojars.org/{project-mvn-coords}[image:https://img.shields.io/clojars/v/{project-mvn-coords}.svg[Clojars Project]]
+https://github.com/users/clj-commons/packages/container/package/antq[image:https://img.shields.io/badge/docker-automated-blue["GitHub Container Registry"]]
 
 [NOTE]
 ====
-Antq requires Clojure 1.10.0 or later. +
-Basically, antq could work regardless of the Clojure version which your project depends. +
-If you have a trouble, please see link:./doc/non-supported-clojure-version.adoc[here].
+Antq requires Clojure 1.11 or later. +
+Basically, antq can work regardless of the Clojure version on which your project depends. +
+If you have trouble, please see link:./doc/non-supported-clojure-version.adoc[here].
 ====
 
 == Supported files
@@ -31,7 +33,7 @@ If you have a trouble, please see link:./doc/non-supported-clojure-version.adoc[
 |
 
 | shadow-cljs.edn
-| https://githur.com/thheller/shadow-cljs[Shadow-cljs]
+| https://github.com/thheller/shadow-cljs[Shadow-cljs]
 | {sym-yes}
 |
 | project.clj
@@ -100,7 +102,6 @@ Or add the following alias to your project `deps.edn` or `$HOME/.clojure/deps.ed
 }
 ----
 Then, run `clojure -M:outdated`.
-(run `clojure -A:outdated` for Clojure CLI Tool 1.10.1.645 or earlier).
 
 [[usage-clojure-tool]]
 === Clojure CLI Tools (`1.11.1.1139` or later)
@@ -162,7 +163,7 @@ Then, run `lein antq`.
 Antq can work with https://github.com/features/actions[GitHub Actions].
 See antq's workflow for concrete example.
 
-* https://github.com/liquidz/antq/blob/master/.github/workflows/dependencies.yml[.github/workflows/dependencies.yml]
+* link:.github/workflows/dependencies.yml[.github/workflows/dependencies.yml]
 * To show errors as annotations, please set this option: `--error-format="::error file={{file}}::{{message}}"`
 
 Or if you prefer, you can use our ready-made GitHub action:
@@ -372,6 +373,11 @@ For java dependencies, ignore versions installed to your local Maven repository(
 
 Detect all tools installed in `~/.clojure/tools` as dependencies.
 You can also upgrade them with <<opt-upgrade>> option.
+
+[[opt-no-progress]]
+=== --no-progress
+
+Skip progress reporting. Progress reporting enabled by default.
 
 [[opt-no-changes]]
 === --no-changes

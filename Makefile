@@ -7,11 +7,13 @@ outdated: ## Run antq to detect outdated dependencies
 	clojure -M:outdated:nop --upgrade
 
 .PHONY: test
-test: install ## Run tests
-	clojure -M:dev:1.10:test
-	clojure -M:dev:1.11:test
-	clojure -M:dev:test
-	script/integration_test.sh
+test: ## Run unit tests
+	clojure -M:dev:1.11:test --skip-meta integration
+	clojure -M:dev:test --skip-meta integration
+
+.PHONY: test-integration
+test-integration: ## Run integration tests
+	clojure -M:dev:test --focus-meta integration
 
 .PHONY: lint
 lint: ## Run linters
@@ -39,7 +41,7 @@ docker-test: ## Run test in a docker container
 
 .PHONY: coverage
 coverage: ## Check coverage
-	clojure -M:test:coverage:dev:nop --src-ns-path=src --test-ns-path=test --codecov
+	clojure -M:dev:test --skip-meta integration --plugin cloverage --codecov --cov-ns-exclude-regex leiningen.antq
 
 .PHONY: clean
 clean:

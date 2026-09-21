@@ -1,8 +1,8 @@
-;; Warn on Clojure 1.7.0 or earlier
+;; Fail on Clojure 1.11.0 or earlier
 (let [{:keys [major minor]} *clojure-version*]
-  (when-not (or (and (= major 1) (>= minor 10))
+  (when-not (or (and (= major 1) (>= minor 11))
                 (> major 1))
-    (.println ^java.io.PrintWriter *err* "antq requires Clojure 1.10.0 or later.")
+    (.println ^java.io.PrintWriter *err* "antq requires Clojure 1.11 or later.")
     (System/exit 1)))
 
 (ns ^:no-doc antq.core
@@ -123,7 +123,8 @@
   (let [res (if-let [forced-version (:forced-version dep)]
               (assoc dep :_versions [forced-version])
               (assoc dep :_versions (ver/get-sorted-versions dep options)))]
-    (report/run-progress dep options)
+    (when-not (:no-progress options)
+      (report/run-progress dep options))
     res))
 
 (defn latest
@@ -315,20 +316,16 @@
         (system-exit 0))
 
       (seq deps)
-      (let [alog (log/start-async-logger!)
-            outdated (antq opts deps)]
-        (try
-          (report/reporter outdated opts)
-          (cond-> outdated
-            (:upgrade opts)
-            (-> (upgrade/upgrade! opts)
-                ;; get non-upgraded deps
-                (get false))
+      (let [outdated (antq opts deps)]
+        (report/reporter outdated opts)
+        (cond-> outdated
+          (:upgrade opts)
+          (-> (upgrade/upgrade! opts)
+              ;; get non-upgraded deps
+              (get false))
 
-            true
-            (exit))
-          (finally
-            (log/stop-async-logger! alog))))
+          true
+          (exit)))
 
       :else
       (do (log/info "No project file")
