@@ -3,13 +3,13 @@
    [babashka.cli :as cli]
    [clojure.string :as str]))
 
-(def ^:private supported-reporter
+(def ^:private valid-reporter
   ["table"
    "format"
    "json"
    "edn"])
 
-(def ^:private skippable
+(def ^:private valid-skip
   ["babashka"
    "boot"
    "circle-ci"
@@ -49,9 +49,9 @@
     :extra-desc (multi-value-tip "--focus" ["art1" "art2"])}
 
    :skip
-   {:ref (format "<%s>" (str/join "|" skippable))
+   {:ref (format "<%s>" (str/join "|" valid-skip))
     :collect multi-value
-    :validate #(every? (set skippable) %)
+    :enum valid-skip
     :desc "Skip specified project file types"
     :extra-desc (multi-value-tip "--format" ["pom" "gradle"])}
 
@@ -61,10 +61,10 @@
     :desc "Customize output for outdated dependencies"}
 
    :reporter
-   {:ref (format "<%s>" (str/join "|" supported-reporter))
+   {:ref (format "<%s>" (str/join "|" valid-reporter))
     :coerce :string
     :default "table"
-    :validate #((set supported-reporter) %)
+    :enum valid-reporter
     :desc "Report output format"}
 
    :directory
