@@ -74,6 +74,13 @@
                      :errors [{:cause :validate :msg #"Invalid value.*reporter.*foo"}]}
                     (sut/parse-args ["--reporter=foo"])))))
 
+  (t/testing "--no-progress"
+    (t/is (match? {:errors m/absent
+                   :warnings m/absent
+                   :help m/absent
+                   :opts {:no-progress true}}
+                  (sut/parse-args ["--no-progress"]))))
+
   (t/testing "--upgrade"
     (t/is (match? {:errors m/absent
                    :warnings m/absent

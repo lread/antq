@@ -120,6 +120,10 @@
    {:coerce boolean
     :desc "Scan outdated transitive deps"}
 
+   :no-progress
+   {:coerce boolean
+    :desc "Skip progress reporting"}
+
    :usage-help-style
    {:coerce :keyword
     :default :cli
@@ -238,7 +242,7 @@
        (format-opts {:spec cli-options :opts opts
                      ;; match order from README, exclude deprecated and undocumented options
                      :order [:upgrade :force :exclude :directory :focus
-                             :skip :error-format :reporter :download :ignore-locals
+                             :skip :error-format :reporter :no-progress :download :ignore-locals
                              :check-clojure-tools :no-changes :changes-in-table :transitive
                              :help]})))
 
