@@ -37,8 +37,12 @@
   :nop
   {:extra-deps {org.slf4j/slf4j-nop {:mvn/version "RELEASE"}}}
 
+  ;; for local usage
+  ;; clojure -M:outdated ...
+  ;; clojure -X:outdated outdated... 
   :outdated
-  {:main-opts ["-m" "antq.core"]}
+  {:main-opts ["-m" "antq.core"]
+   :ns-default antq.tool}
 
   :test
   {:main-opts ["-m" "kaocha.runner"]}
