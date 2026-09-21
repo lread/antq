@@ -248,7 +248,7 @@
 
 (defn parse-args
   "Parses command line `args` and returns a map of:
-  - `:warnings` - non-fatal issues, caller should dispaly
+  - `:warnings` - non-fatal issues, caller should display
   - `:errors` - fatal issues, caller should display
   - `:help` - usage help as text, caller should display
   - `:opts` - parsed opts
