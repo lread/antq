@@ -105,6 +105,7 @@
                           :skip ["pom" "gradle" "leiningen"]
                           :error-format "my error format"
                           :reporter "json"
+                          :no-progress true
                           :directory ["." "two" "three"]
                           :upgrade true
                           :verbose true
@@ -120,6 +121,7 @@
                                    "--skip" "pom:gradle" "--skip" "leiningen"
                                    "--error-format" "my error format"
                                    "--reporter" "json"
+                                   "--no-progress"
                                    "--directory" "two" "-d" "three"
                                    "--upgrade"
                                    "--verbose"
