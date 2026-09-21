@@ -204,7 +204,7 @@
 (defn- format-opts
   "customized bb cli format-opts"
   [{:as cfg}]
-  (cli/format-table {:rows (opts->table cfg) :indent 1}))
+  (cli/format-table {:rows (opts->table cfg) :indent 1 :wrap false}))
 
 (defn- deprecation-warnings
   [opts]
