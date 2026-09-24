@@ -291,6 +291,14 @@
       :always
       (unmark-only-newest-version-flag))))
 
+(defn- error-text
+  [text]
+  (str "\u001B[41;30mERROR:\u001B[0m\u001B[31m " text "\u001B[0m"))
+
+(defn- warning-text
+  [text]
+  (str "\u001B[43;30mWARNING:\u001B[0m\u001B[33m " text "\u001B[0m"))
+
 (defn main*
   [{:keys [opts warnings errors help]}]
   (u.maven/initialize-proxy-setting!)
@@ -301,11 +309,11 @@
                (fetch-deps opts))]
     (doseq [w warnings]
       ;; a bit weird to log/info but warnings only show if verbose is enabled
-      (log/info (str "WARNING: " (:msg w))))
+      (log/info (warning-text (:msg w))))
     (cond
       (seq errors)
       (do (doseq [e errors]
-            (log/error (str "ERROR: " (:msg e))))
+            (log/error (error-text (:msg e))))
           (log/info "")
           (log/info help)
           (system-exit 1))
