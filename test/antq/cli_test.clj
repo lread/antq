@@ -137,10 +137,10 @@
     (t/is (match? {:help #"(?s).*USAGE.*--upgrade.*repeat arg"
                    :warnings [{:cause :deprecation
                                :msg #"no-diff.*deprecated.*use.*no-changes"}]
-                   :errors [{:cause :restrict-args :msg #"Unexpected argument.*somecmd"}
-                            {:cause :restrict :msg #"Unknown option.*excude"}
-                            {:cause :validate :msg #"Invalid value.*reporter.*foo"}
-                            {:cause :validate :msg #"Invalid value.*skip.*nope"}]}
+                   :errors [{:cause :validate :msg #"Invalid value.*reporter.*foo"}
+                            {:cause :validate :msg #"Invalid value.*skip.*nope"}
+                            {:cause :restrict-args :msg #"Unexpected argument.*somecmd"}
+                            {:cause :restrict :msg #"Unknown option.*excude"}]}
                   (sut/parse-args ["somecmd"
                                    "--reporter" "foo"
                                    "--skip" "nope"
@@ -221,9 +221,9 @@
     (t/is (match? {:help #"(?s).*USAGE.*:upgrade.*use a vector"
                    :warnings [{:cause :deprecation
                                :msg #"no-diff.*deprecated.*use.*no-changes"}]
-                   :errors [{:cause :restrict :msg #"Unknown option.*excude"}
-                            {:cause :validate :msg #"Invalid value.*reporter.*foo"}
-                            {:cause :validate :msg #"Invalid value.*skip.*nope"}]}
+                   :errors [{:cause :validate :msg #"Invalid value.*reporter.*foo"}
+                            {:cause :validate :msg #"Invalid value.*skip.*nope"}
+                            {:cause :restrict :msg #"Unknown option.*excude"}]}
                   (sut/validate-tool-opts {:reporter "foo"
                                            :skip ["nope"]
                                            :no-diff true

@@ -264,11 +264,13 @@
       {:help (usage-help {:opts opts})}
       (let [{:keys [opts]} (cli/parse-args orig-args
                                            {:spec cli-options
-                                            :error-fn (fn [error] (swap! errors conj error))
+                                            :error-fn (fn [error]
+                                                        (swap! errors conj error))
                                             :restrict true
                                             :restrict-args true})
-            errors @errors
-            warnings (deprecation-warnings opts)]
+            ;; for now, sort by msg, I'd rather sort by user entry order, but that's a nitpik
+            errors (sort-by :msg @errors)
+            warnings (sort-by :msg (deprecation-warnings opts))]
         (cond-> {}
           (seq warnings)
           (assoc :warnings warnings)
