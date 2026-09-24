@@ -86,7 +86,7 @@
 
    :verbose
    {:coerce boolean
-    :desc "Verbose logging"}
+    :desc "Do some extra logging"}
 
    :force
    {:coerce boolean
@@ -110,7 +110,7 @@
 
    :no-changes
    {:coerce boolean
-    :desc "Skip checking changes between deps versions"}
+    :desc "Skip reporting changes between outdated deps and current versions"}
 
    :changes-in-table
    {:coerce boolean
@@ -244,7 +244,7 @@
                      :order [:upgrade :force :exclude :directory :focus
                              :skip :error-format :reporter :no-progress :download :ignore-locals
                              :check-clojure-tools :no-changes :changes-in-table :transitive
-                             :help]})))
+                             :verbose :help]})))
 
 (defn parse-args
   "Parses command line `args` and returns a map of:
