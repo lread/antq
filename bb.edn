@@ -12,10 +12,10 @@
   lint-cljstyle {:task lint-cljstyle/-main   :doc "lint with cljstyle"}
   test-clj      {:exec-fn test-clj/task      :doc "run tests against a version of Clojure"}
   test-coverage {:exec-fn test-coverage/task :doc "generate code coverage reports Clojure tests"}
-  jar           {:exec-fn jar/jar            :doc "Generate antq jar"}
-  uberjar       {:exec-fn jar/uberjar        :doc "Generate antq uberjar"
+  jar           {:exec-fn jar/jar            :doc "generate antq jar"}
+  uberjar       {:exec-fn jar/uberjar        :doc "generate antq uberjar"
                  :override-builtin true}
-  install       {:exec-fn jar/install        :doc "Install antq to local maven repository"}
+  install       {:exec-fn jar/install        :doc "install antq to local maven repository"}
   antq          {:task outdated/-main        :doc "run antq on antq"}
   docker-build  {:exec-fn docker/build       :doc "build docker image"}
   docker-antq   {:exec-fn docker/sources     :doc "run antq on against cwd from docker image"}}}
